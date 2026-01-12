@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Content Assistant | دستیار محتوای هوش مصنوعی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --font-fa: 'Vazirmatn', sans-serif;
+        --font-en: 'Inter', sans-serif;
+      }
+      body {
+        margin: 0;
+        overflow-x: hidden;
+        transition: background-color 0.5s ease;
+      }
+      .font-fa { font-family: var(--font-fa); }
+      .font-en { font-family: var(--font-en); }
+      [dir="rtl"] { font-family: var(--font-fa); }
+      [dir="ltr"] { font-family: var(--font-en); }
+      
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <div id="root"></div>
+  </body>
+</html>

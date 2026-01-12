@@ -1,0 +1,7 @@
+{
+  "name": "Bilingual AI Instagram Assistant",
+  "description": "A Persian-first AI content assistant that generates Instagram calendars, captions, and hashtags optimized for the Iranian market.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
