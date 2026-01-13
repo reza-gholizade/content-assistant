@@ -8,36 +8,41 @@ export async function generateInstagramContent(data: ContentFormData, lang: Lang
   const model = "gemini-3-flash-preview";
   
   const systemInstruction = lang === 'fa' 
-    ? `شما یک دستیار حرفه‌ای تولید محتوای اینستاگرام برای بازار ایران هستید. 
-       محتوا باید کاملا بومی، جذاب، عامیانه یا رسمی (بسته به لحن انتخابی) و مناسب فرهنگ اینستاگرام فارسی باشد.
-       از ترجمه کلمه به کلمه پرهیز کنید. از ایموجی‌های مناسب استفاده کنید.
-       در تولید کپشن‌ها حتما به شخصیت (Persona) و تأثیری (Effect) که کاربر انتخاب کرده توجه ویژه داشته باشید.
-       اگر کاربر جزییات نهایی خاصی وارد کرده، حتما آن‌ها را در اولویت قرار دهید.`
-    : `You are a professional Instagram content assistant. 
-       Generate native-level, engaging, and high-quality content optimized for Instagram culture.
-       Use appropriate emojis. Focus heavily on the desired Persona and Effect provided by the user.
-       If the user provided specific final details, prioritize incorporating them into the output.`;
+    ? `شما یک استراتژیست ارشد بازاریابی و ادمین حرفه‌ای اینستاگرام هستید. 
+       وظیفه شما تولید محتوایی است که نه تنها جذاب است، بلکه باعث رشد و فروش واقعی می‌شود.
+       قوانین طلایی شما:
+       ۱. هر کپشن باید با یک قلاب (Hook) خیره‌کننده شروع شود که مخاطب را در ثانیه اول متوقف کند.
+       ۲. اگر پیج فروشگاهی است، از تکنیک‌های روانشناسی فروش (کمیابی، فوریت، اثبات اجتماعی) استفاده کنید.
+       ۳. ایده‌های استوری و ریلز باید کاملاً استراتژیک و هدفمند باشند.
+       ۴. لحن محتوا باید کاملاً بومی، طبیعی و با رعایت دقیق پرسونای انتخابی باشد.
+       ۵. شما معمار اصلی حضور دیجیتال این برند هستید، پس جدی و فوق‌حرفه‌ای عمل کنید.`
+    : `You are a World-Class Professional Marketing Strategist and Expert Instagram Page Admin. 
+       Your mission is to provide high-impact content that converts and grows the brand.
+       Your Golden Rules:
+       1. Every caption MUST start with a "Scroll-Stopping Hook" to stop the user instantly.
+       2. Use advanced psychological sales techniques (scarcity, urgency, social proof) for sales-oriented content.
+       3. Ideas for Stories and Reels must be strategic, goal-oriented, and innovative.
+       4. Ensure native-level fluency and perfectly match the chosen Persona and Tone.
+       5. Act as the principal architect of the brand's digital presence.`;
 
   const prompt = `
-    Generate an Instagram content plan based on these details:
-    - Page Type: ${data.pageType}
-    - Topic: ${data.topic}
-    - Target Audience Age Range: ${data.ageRange[0]} to ${data.ageRange[1]} years old
-    - Audience Gender: ${data.audienceGender || 'N/A'}
-    - Audience Main Concern: ${data.audienceConcern || 'N/A'}
-    - Tone: ${data.tone}
-    - Frequency: ${data.frequency}
-    - Desired Effect on Audience: ${data.effect}
-    - Desired Personality/Persona: ${data.persona}
-    - IMPORTANT - Final Specific Details to include/influence: ${data.finalDetails || 'None'}
-    - Target Language: ${lang === 'fa' ? 'Persian (Farsi)' : 'English'}
+    Generate a Strategic Instagram Content Plan for:
+    - Business Category: ${data.pageType}
+    - Niche/Topic: ${data.topic}
+    - Audience Profile: Age ${data.ageRange[0]}-${data.ageRange[1]}, Gender: ${data.audienceGender || 'All'}, Main Concern: ${data.audienceConcern || 'N/A'}
+    - Brand Persona: ${data.persona}
+    - Desired Psychological Effect: ${data.effect}
+    - Communication Tone: ${data.tone}
+    - Post Frequency: ${data.frequency}
+    - MANDATORY CUSTOM INSTRUCTIONS: ${data.finalDetails || 'Use your expertise to influence captions and hashtags for maximum growth.'}
+    - Language: ${lang === 'fa' ? 'Persian (Farsi)' : 'English'}
 
-    Requirements:
-    1. A weekly content calendar.
-    2. 3 High-quality ready-to-post captions (approx 150-250 words each).
-    3. 15-20 relevant hashtags (mix of broad and niche).
-    4. 5 Creative story ideas.
-    5. 5 Simple Reel scenarios.
+    Deliverables:
+    1. A strategic Weekly Content Calendar (Posts/Reels).
+    2. 3 Premium Captions with powerful Hooks and clear CTAs (150-250 words).
+    3. 15-20 Optimized Hashtags (Niche-specific).
+    4. 5 Strategic Story Ideas.
+    5. 5 Reel Scenarios with high viral potential.
   `;
 
   const response = await ai.models.generateContent({
@@ -101,8 +106,8 @@ export async function generateInstagramContent(data: ContentFormData, lang: Lang
 export async function askAdvisor(question: string, lang: Language): Promise<string> {
   const model = "gemini-3-pro-preview";
   const systemInstruction = lang === 'fa'
-    ? "شما یک مشاور حرفه‌ای اینستاگرام هستید. پاسخ‌های شما باید کوتاه، کاربردی و به زبان فارسی باشد."
-    : "You are a professional Instagram marketing consultant. Provide short, actionable advice.";
+    ? "شما یک مشاور ارشد بازاریابی اینستاگرام هستید. پاسخ‌های شما باید کوتاه، استراتژیک و کاملاً حرفه‌ای باشد."
+    : "You are a senior Instagram marketing strategist. Provide short, strategic, and highly professional advice.";
 
   const response = await ai.models.generateContent({
     model,

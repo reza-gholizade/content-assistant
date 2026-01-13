@@ -44,7 +44,6 @@ import {
   Share2
 } from 'lucide-react';
 
-// STANDALONE Age Selector Component to fix dragging bug
 const AgeRangeSelector: React.FC<{ 
   value: [number, number]; 
   onChange: (val: [number, number]) => void; 
@@ -54,32 +53,46 @@ const AgeRangeSelector: React.FC<{
   const minAge = 13;
   const maxAge = 65;
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState<'min' | 'max' | null>(null);
+  const isDraggingRef = useRef<'min' | 'max' | null>(null);
+
+  // We use refs to keep track of the current values without causing excessive re-renders during drag
+  const currentValuesRef = useRef(value);
+  useEffect(() => {
+    currentValuesRef.current = value;
+  }, [value]);
 
   const handleUpdate = useCallback((clientX: number) => {
-    if (!sliderRef.current || !isDragging) return;
+    if (!sliderRef.current || !isDraggingRef.current) return;
     const rect = sliderRef.current.getBoundingClientRect();
     const percent = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
     const val = Math.round(minAge + percent * (maxAge - minAge));
 
-    if (isDragging === 'min') {
-      onChange([Math.min(val, value[1] - 1), value[1]]);
-    } else if (isDragging === 'max') {
-      onChange([value[0], Math.max(val, value[0] + 1)]);
+    const [currentMin, currentMax] = currentValuesRef.current;
+
+    if (isDraggingRef.current === 'min') {
+      const newMin = Math.min(val, currentMax - 1);
+      if (newMin !== currentMin) onChange([newMin, currentMax]);
+    } else if (isDraggingRef.current === 'max') {
+      const newMax = Math.max(val, currentMin + 1);
+      if (newMax !== currentMax) onChange([currentMin, newMax]);
     }
-  }, [isDragging, value, onChange, minAge, maxAge]);
+  }, [onChange, minAge, maxAge]);
 
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => isDragging && handleUpdate(e.clientX);
-    const onTouchMove = (e: TouchEvent) => isDragging && handleUpdate(e.touches[0].clientX);
-    const onEnd = () => setIsDragging(null);
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDraggingRef.current) handleUpdate(e.clientX);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (isDraggingRef.current) handleUpdate(e.touches[0].clientX);
+    };
+    const onEnd = () => {
+      isDraggingRef.current = null;
+    };
 
-    if (isDragging) {
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onEnd);
-      window.addEventListener('touchmove', onTouchMove);
-      window.addEventListener('touchend', onEnd);
-    }
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
@@ -87,9 +100,14 @@ const AgeRangeSelector: React.FC<{
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onEnd);
     };
-  }, [isDragging, handleUpdate]);
+  }, [handleUpdate]);
 
   const getPos = (val: number) => ((val - minAge) / (maxAge - minAge)) * 100;
+
+  const startDrag = (type: 'min' | 'max', e: React.MouseEvent | React.TouchEvent) => {
+    // e.preventDefault(); // This can sometimes interfere with scrolling on mobile if not careful
+    isDraggingRef.current = type;
+  };
 
   return (
     <div className="space-y-6 select-none py-4">
@@ -101,17 +119,17 @@ const AgeRangeSelector: React.FC<{
             style={{ left: `${getPos(value[0])}%`, right: `${100 - getPos(value[1])}%` }}
           />
           <div 
-            onMouseDown={(e) => { e.preventDefault(); setIsDragging('min'); }}
-            onTouchStart={() => setIsDragging('min')}
-            className={`absolute top-1/2 -translate-y-1/2 w-8 h-8 ${themeColors.primary} rounded-full border-4 border-white dark:border-gray-900 shadow-lg cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110`}
+            onMouseDown={(e) => startDrag('min', e)}
+            onTouchStart={(e) => startDrag('min', e)}
+            className={`absolute top-1/2 -translate-y-1/2 w-8 h-8 ${themeColors.primary} rounded-full border-4 border-white dark:border-gray-900 shadow-lg cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110 active:scale-125`}
             style={{ left: `${getPos(value[0])}%`, transform: 'translate(-50%, -50%)' }}
           >
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded font-black">{value[0]}</div>
           </div>
           <div 
-            onMouseDown={(e) => { e.preventDefault(); setIsDragging('max'); }}
-            onTouchStart={() => setIsDragging('max')}
-            className={`absolute top-1/2 -translate-y-1/2 w-8 h-8 ${themeColors.primary} rounded-full border-4 border-white dark:border-gray-900 shadow-lg cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110`}
+            onMouseDown={(e) => startDrag('max', e)}
+            onTouchStart={(e) => startDrag('max', e)}
+            className={`absolute top-1/2 -translate-y-1/2 w-8 h-8 ${themeColors.primary} rounded-full border-4 border-white dark:border-gray-900 shadow-lg cursor-grab active:cursor-grabbing z-10 transition-transform hover:scale-110 active:scale-125`}
             style={{ left: `${getPos(value[1])}%`, transform: 'translate(-50%, -50%)' }}
           >
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded font-black">{value[1]}</div>
@@ -312,7 +330,7 @@ const App: React.FC = () => {
             <div className="space-y-6">
               <AgeRangeSelector 
                 value={formData.ageRange} 
-                onChange={(range) => setFormData({...formData, ageRange: range})} 
+                onChange={(range) => setFormData(prev => ({...prev, ageRange: range}))} 
                 label={t.ageRangeLabel}
                 themeColors={themeColors}
               />
@@ -535,7 +553,8 @@ const App: React.FC = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleShare(cap.text, cap.title)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-white dark:bg-gray-700 text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 transition-all shadow-sm`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-blue-500 text-white hover:bg-blue-400 transition-all shadow-md active:scale-90`}
+                            title="Share"
                           >
                             <Share2 size={16} />
                           </button>
@@ -544,7 +563,7 @@ const App: React.FC = () => {
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black transition-all ${
                               copiedId === `cap-${i}` 
                                 ? 'bg-emerald-500 text-white' 
-                                : `bg-white dark:bg-gray-700 ${themeColors.text} hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600`
+                                : `bg-white dark:bg-gray-700 ${themeColors.text} hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 shadow-sm`
                             }`}
                           >
                             {copiedId === `cap-${i}` ? <Check size={16} /> : <Copy size={16} />}
@@ -555,7 +574,7 @@ const App: React.FC = () => {
                       <textarea
                         value={cap.text}
                         onChange={(e) => handleCaptionChange(i, e.target.value)}
-                        className="w-full min-h-[200px] p-8 text-gray-800 dark:text-gray-200 text-lg leading-relaxed font-fa tracking-wide bg-transparent outline-none resize-none focus:ring-2 focus:ring-emerald-500/20"
+                        className="w-full min-h-[250px] p-8 text-gray-800 dark:text-gray-200 text-lg leading-relaxed font-fa tracking-wide bg-transparent outline-none resize-none focus:ring-2 focus:ring-emerald-500/20"
                       />
                     </div>
                   ))}
@@ -574,7 +593,7 @@ const App: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleShare(output.hashtags.join(' '), t.hashtagsTab)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black bg-white dark:bg-gray-700 text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 transition-all shadow-lg`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black bg-blue-500 text-white hover:bg-blue-400 transition-all shadow-lg active:scale-90`}
                       >
                         <Share2 size={18} />
                       </button>
