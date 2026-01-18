@@ -1,8 +1,9 @@
 {
   "name": "content-assistant",
-  "compatibility_date": "2026-01-17",
-  "main": "src/index.ts",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist", // The folder containing your index.html
+    "binding": "ASSETS"    // This makes 'env.ASSETS' available in your code
   }
 }
