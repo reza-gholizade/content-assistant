@@ -8,7 +8,12 @@ export default defineConfig(({ mode }) => {
       base: '/', // Ensure base path is root for Cloudflare Workers
       server: {
         port: 3000,
-        host: '0.0.0.0',
+        host: '0.0.0.0', // Listen on all network interfaces
+        strictPort: false, // Try next available port if 3000 is taken
+      },
+      preview: {
+        port: 3000,
+        host: '0.0.0.0', // Also bind preview server to all interfaces
       },
       plugins: [react()],
       define: {
